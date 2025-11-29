@@ -1,0 +1,499 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greenslim - Panduan Interaktif Produk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Earthy Green & Warm Neutral -->
+    <!-- Application Structure Plan: Saya merancang aplikasi ini dengan struktur berbasis tab (dashboard-style) untuk memungkinkan navigasi non-linear. Tujuannya adalah agar tim lapangan dapat dengan cepat mengakses informasi yang relevan saat berdiskusi dengan tenaga kesehatan, alih-alih mengikuti alur dokumen yang linear. Strukturnya adalah: 1) Gambaran Umum (landing page dengan data kunci & 4 pilar), 2) Mekanisme Aksi (penjelasan ilmiah interaktif per bahan), 3) Posisi Produk (alat perbandingan dinamis), 4) Panduan Klinis (info praktis & keamanan), dan 5) Tanya Jawab (alat bantu atasi keberatan). Struktur ini dipilih karena mengubah materi training menjadi alat pendukung kinerja (performance support tool) yang praktis dan efisien di lapangan. -->
+    <!-- Visualization & Content Choices: 1. Data Tren Obesitas: Report Info -> Prevalensi Obesitas di Indonesia -> Goal: Menunjukkan urgensi masalah -> Viz: Line Chart (Chart.js) -> Interaction: Hover untuk melihat data per tahun/gender -> Justification: Visualisasi tren lebih berdampak daripada teks. 2. Empat Pilar Aksi: Report Info -> Konsep Sinergi Greenslim -> Goal: Memperkenalkan UVP secara visual -> Presentation: Kartu interaktif (HTML/CSS/JS) -> Interaction: Klik untuk menampilkan detail singkat -> Justification: Memecah konsep inti menjadi bagian-bagian yang mudah dicerna. 3. Perbandingan Kompetitor: Report Info -> Matriks Posisi -> Goal: Menunjukkan keunggulan kompetitif -> Presentation: Tabel dinamis (HTML/JS) -> Interaction: Tombol untuk memilih pembanding -> Justification: Lebih interaktif dan fokus daripada tabel statis. 4. Profil Keamanan & FAQ: Report Info -> Detail keamanan & keberatan umum -> Goal: Menyediakan akses cepat ke info penting -> Presentation: Accordion (HTML/JS) -> Interaction: Klik untuk membuka/menutup jawaban -> Justification: Menghemat ruang dan mengurangi 'information overload'. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #3D405B;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-button.active {
+            border-bottom-color: #6B8E23;
+            color: #6B8E23;
+            font-weight: 600;
+        }
+        .pillar-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .pillar-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="min-h-screen container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-[#3D405B]">Greenslim</h1>
+            <p class="text-lg text-gray-600 mt-1">Panduan Interaktif untuk Tenaga Kesehatan Profesional</p>
+        </header>
+
+        <nav class="flex justify-center border-b border-gray-200 mb-8 flex-wrap">
+            <button data-tab="overview" class="nav-button py-4 px-6 text-sm md:text-base font-medium text-gray-500 hover:text-[#6B8E23] active">Gambaran Umum</button>
+            <button data-tab="mechanism" class="nav-button py-4 px-6 text-sm md:text-base font-medium text-gray-500 hover:text-[#6B8E23]">Mekanisme Aksi</button>
+            <button data-tab="positioning" class="nav-button py-4 px-6 text-sm md:text-base font-medium text-gray-500 hover:text-[#6B8E23]">Posisi Produk</button>
+            <button data-tab="clinical" class="nav-button py-4 px-6 text-sm md:text-base font-medium text-gray-500 hover:text-[#6B8E23]">Panduan Klinis</button>
+            <button data-tab="faq" class="nav-button py-4 px-6 text-sm md:text-base font-medium text-gray-500 hover:text-[#6B8E23]">Tanya Jawab</button>
+        </nav>
+
+        <main>
+            <div id="overview" class="tab-content active">
+                <section class="bg-white rounded-lg shadow p-6 mb-8">
+                    <h2 class="text-2xl font-bold mb-4 text-center text-[#3D405B]">Mengatasi Epidemi Obesitas di Indonesia</h2>
+                    <p class="text-center text-gray-600 mb-6 max-w-3xl mx-auto">Bagian ini menyajikan data prevalensi obesitas di Indonesia untuk memberikan konteks klinis dan menekankan urgensi manajemen berat badan. Grafik interaktif di bawah ini menunjukkan tren yang mengkhawatirkan dari tahun 2007 hingga 2023, menyoroti peningkatan yang konsisten baik pada pria maupun wanita.</p>
+                    <div class="chart-container">
+                        <canvas id="obesityChart"></canvas>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-center text-[#3D405B]">Pendekatan Holistik Greenslim: Strategi 4 Pilar</h2>
+                     <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Greenslim menawarkan pendekatan multi-mekanisme yang dirancang secara rasional. Berbeda dengan produk tunggal, formulasi sinergis kami menargetkan empat jalur kunci dalam manajemen berat badan. Klik setiap pilar di bawah untuk melihat bagaimana setiap komponen berkontribusi pada strategi yang komprehensif.</p>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6" id="pillars-container">
+                    </div>
+                </section>
+            </div>
+
+            <div id="mechanism" class="tab-content">
+                <section class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-center text-[#3D405B]">Ilmu di Balik Greenslim: Penjelasan Mendalam</h2>
+                    <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Setiap komponen dalam Greenslim memiliki peran farmakologis yang spesifik dan berbasis bukti. Di bagian ini, Anda dapat menjelajahi mekanisme aksi dari masing-masing ekstrak secara rinci, mulai dari penghambatan sintesis lemak hingga regulasi pembentukan sel lemak baru. Pilih bahan di bawah untuk mempelajari lebih lanjut.</p>
+                    <div class="flex justify-center mb-6 border border-gray-200 rounded-lg p-1 space-x-1 bg-gray-50">
+                        <button data-ingredient="garcinia" class="ingredient-btn flex-1 py-2 px-4 text-sm font-semibold rounded-md transition bg-[#6B8E23] text-white">Garcinia Cambogia</button>
+                        <button data-ingredient="guazuma" class="ingredient-btn flex-1 py-2 px-4 text-sm font-semibold rounded-md transition text-gray-600 hover:bg-gray-200">Guazuma Ulmifolia</button>
+                        <button data-ingredient="camellia" class="ingredient-btn flex-1 py-2 px-4 text-sm font-semibold rounded-md transition text-gray-600 hover:bg-gray-200">Camellia Sinensis</button>
+                        <button data-ingredient="murraya" class="ingredient-btn flex-1 py-2 px-4 text-sm font-semibold rounded-md transition text-gray-600 hover:bg-gray-200">Murraya Paniculata</button>
+                    </div>
+                    <div id="mechanism-content" class="mt-4 p-4 border rounded-lg bg-gray-50 min-h-[200px]">
+                    </div>
+                </section>
+            </div>
+
+            <div id="positioning" class="tab-content">
+                <section class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-center text-[#3D405B]">Posisi & Diferensiasi Produk</h2>
+                    <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Bagian ini dirancang untuk membantu Anda mengartikulasikan keunggulan unik Greenslim dibandingkan dengan terapi lain yang mungkin sudah dikenal oleh tenaga kesehatan. Gunakan alat perbandingan interaktif ini untuk menyoroti perbedaan kunci dalam mekanisme, target, dan pendekatan secara keseluruhan.</p>
+                    <div class="text-center mb-6">
+                        <span class="font-semibold mr-4">Bandingkan Greenslim dengan:</span>
+                        <button data-competitor="orlistat" class="competitor-btn bg-[#6B8E23] text-white py-2 px-4 rounded-lg shadow">Orlistat</button>
+                        <button data-competitor="herbal" class="competitor-btn bg-white text-gray-700 py-2 px-4 rounded-lg shadow border">Kompetitor Herbal Umum</button>
+                    </div>
+                    <div id="comparison-table" class="overflow-x-auto">
+                    </div>
+                </section>
+            </div>
+            
+            <div id="clinical" class="tab-content">
+                <section class="bg-white rounded-lg shadow p-6">
+                     <h2 class="text-2xl font-bold mb-4 text-center text-[#3D405B]">Panduan Praktis Aplikasi Klinis</h2>
+                     <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Informasi di bagian ini memberikan panduan praktis untuk penggunaan Greenslim dalam praktik klinis sehari-hari. Mulai dari profil pasien yang ideal, dosis yang direkomendasikan, hingga profil keamanan yang transparan untuk membangun kepercayaan dengan tenaga kesehatan.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-semibold mb-3 text-[#3D405B]">Profil Pasien Ideal & Dosis</h3>
+                            <div id="patient-profile" class="space-y-4"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-3 text-[#3D405B]">Profil Keamanan & Kontraindikasi</h3>
+                            <div id="safety-profile" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="faq" class="tab-content">
+                <section class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-center text-[#3D405B]">Menangani Keberatan & Pertanyaan Umum</h2>
+                    <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Setiap interaksi klinis pasti akan memunculkan pertanyaan. Bagian ini mempersiapkan Anda dengan jawaban yang berbasis ilmiah untuk pertanyaan dan keberatan yang paling umum diajukan. Gunakan ini sebagai panduan untuk memfasilitasi diskusi yang produktif dan informatif.</p>
+                    <div id="faq-container" class="space-y-4">
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const data = {
+                pillars: [
+                    {
+                        title: "Hambat Sintesis Lemak",
+                        ingredient: "Garcinia Cambogia",
+                        icon: "🛡️",
+                        description: "Memblokir enzim kunci yang mengubah kelebihan karbohidrat menjadi lemak, mengalihkannya menjadi energi (glikogen)."
+                    },
+                    {
+                        title: "Kurangi Penyerapan Lemak",
+                        ingredient: "Guazuma Ulmifolia",
+                        icon: "🍃",
+                        description: "Menghambat enzim lipase pankreas di usus, mengurangi jumlah lemak dari makanan yang diserap oleh tubuh."
+                    },
+                    {
+                        title: "Tingkatkan Energi Keluar",
+                        ingredient: "Camellia Sinensis",
+                        icon: "🔥",
+                        description: "Meningkatkan laju metabolisme (termogenesis) dan pembakaran lemak sebagai sumber energi."
+                    },
+                    {
+                        title: "Regulasi Sel Lemak Baru",
+                        ingredient: "Murraya Paniculata",
+                        icon: "🧬",
+                        description: "Pendekatan inovatif untuk mengganggu pematangan sel lemak baru, mencegah penambahan kapasitas penyimpanan lemak."
+                    }
+                ],
+                mechanisms: {
+                    garcinia: {
+                        title: "Pilar 1: Penghambatan Sintesis Lemak (Garcinia Cambogia, 150 mg)",
+                        content: `
+                            <p><strong>Mekanisme Utama:</strong> Senyawa aktif Asam Hidroksisitrat (HCA) adalah inhibitor kompetitif poten terhadap enzim ATP sitrat liase. Enzim ini krusial dalam proses konversi kelebihan karbohidrat menjadi asam lemak. Dengan menghambat enzim ini, HCA membantu mengalihkan karbohidrat menuju penyimpanan glikogen.</p>
+                            <p class="mt-2"><strong>Aksi Sekunder:</strong> HCA juga dapat memengaruhi nafsu makan dengan meningkatkan kadar serotonin di otak, yang memicu rasa kenyang.</p>
+                            <p class="mt-2"><strong>Tingkat Bukti:</strong> Didukung oleh meta-analisis yang menunjukkan penurunan berat badan jangka pendek yang signifikan secara statistik dibandingkan plasebo.</p>
+                        `
+                    },
+                    guazuma: {
+                        title: "Pilar 2: Pengurangan Penyerapan Lemak (Guazuma Ulmifolia, 150 mg)",
+                        content: `
+                            <p><strong>Mekanisme Utama:</strong> Berfungsi sebagai inhibitor lipase pankreas alami. Lipase pankreas memecah trigliserida dari makanan. Dengan menghambatnya, Guazuma mengurangi jumlah lemak yang diserap, mirip dengan cara kerja Orlistat.</p>
+                            <p class="mt-2"><strong>Aksi Sekunder:</strong> Kandungan musilago (serat larut) dapat membentuk gel di usus, memerangkap lemak dan memberi rasa kenyang.</p>
+                            <p class="mt-2"><strong>Tingkat Bukti:</strong> Penggunaan tradisional yang luas di Indonesia, didukung oleh studi in-vitro modern yang mengkonfirmasi aktivitas penghambatan lipasenya.</p>
+                        `
+                    },
+                    camellia: {
+                        title: "Pilar 3: Peningkatan Pengeluaran Energi (Camellia Sinensis, 50 mg)",
+                        content: `
+                            <p><strong>Mekanisme Utama:</strong> Epigallocatechin gallate (EGCG) meningkatkan termogenesis dan oksidasi lemak dengan menghambat enzim COMT. Ini memperpanjang aksi norepinefrin, yang meningkatkan laju metabolisme dan pembakaran lemak.</p>
+                            <p class="mt-2"><strong>Aksi Sekunder:</strong> Dalam jangka panjang, dapat meningkatkan ekspresi gen untuk enzim-enzim kunci metabolisme lemak.</p>
+                            <p class="mt-2"><strong>Tingkat Bukti:</strong> Efek termogenik telah didokumentasikan dengan baik dalam uji klinis yang menunjukkan peningkatan pengeluaran energi harian.</p>
+                        `
+                    },
+                    murraya: {
+                        title: "Pilar 4: Regulasi Pematangan Adiposit (Murraya Paniculata, 150 mg)",
+                        content: `
+                            <p><strong>Mekanisme Utama:</strong> Ini adalah pilar paling inovatif. Penelitian menunjukkan Murraya paniculata berpotensi mengganggu adipogenesis (pematangan sel lemak baru) dengan menurunkan regulasi gen kunci seperti PPAR-gamma (PPARG) dan EP300.</p>
+                            <p class="mt-2"><strong>Keunggulan:</strong> Ini bukan hanya tentang 'membakar' lemak yang ada, tetapi juga berpotensi mencegah pembentukan kapasitas penyimpanan lemak baru.</p>
+                            <p class="mt-2"><strong>Tingkat Bukti:</strong> Didukung oleh data pra-klinis (in-vitro) dan komputasi (farmakologi jaringan) yang kuat, serta studi pada hewan.</p>
+                        `
+                    }
+                },
+                comparison: {
+                    orlistat: {
+                        greenslim: ["<strong>4 Mekanisme:</strong> Inhibisi Lipogenesis, Inhibisi Lipase, Termogenesis, Regulasi Adipogenesis", "Metabolisme, Penyerapan & Penyimpanan Lemak", "Suplemen Herbal (Tanpa Resep)", "<strong>Pendekatan holistik, multi-jalur</strong> yang menggabungkan ilmu herbal tradisional dan modern."],
+                        competitor: ["<strong>1 Mekanisme:</strong> Inhibisi Lipase Pankreas", "Penyerapan Lemak Makanan", "Hanya dengan Resep Dokter", "Intervensi farmasi yang poten dengan target tunggal."]
+                    },
+                    herbal: {
+                        greenslim: ["<strong>4 Mekanisme:</strong> Inhibisi Lipogenesis, Inhibisi Lipase, Termogenesis, Regulasi Adipogenesis", "Metabolisme, Penyerapan & Penyimpanan Lemak", "Formulasi berbasis bukti ilmiah", "<strong>Pendekatan holistik, multi-jalur</strong> dengan mekanisme yang jelas dan terartikulasi."],
+                        competitor: ["<strong>1 Mekanisme:</strong> Umumnya Laksatif/Diuretik", "Motilitas Usus, Berat Air", "Klaim 'pembakar lemak' tidak jelas", "Tidak spesifik, berfokus pada kehilangan air/limbah sementara, bukan metabolisme lemak."]
+                    }
+                },
+                patientProfile: `
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="font-semibold">👤 Profil Pasien Ideal:</p>
+                        <ul class="list-disc list-inside text-gray-700 mt-2 space-y-1">
+                            <li>Individu dengan Kelebihan Berat Badan (IMT 25-29,9 kg/m²) atau Obesitas ringan (IMT 30-34,9 kg/m²).</li>
+                            <li>Pasien yang mencari terapi pendamping untuk mendukung diet dan olahraga.</li>
+                            <li>Pasien yang tidak puas dengan suplemen bahan tunggal.</li>
+                            <li>Pasien yang belum menjadi kandidat atau enggan memulai terapi resep.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg mt-4">
+                        <p class="font-semibold">💊 Dosis dan Administrasi:</p>
+                        <ul class="list-disc list-inside text-gray-700 mt-2 space-y-1">
+                            <li><strong>Dosis:</strong> Satu kapsul, tiga kali sehari.</li>
+                            <li><strong>Waktu:</strong> 30 menit sebelum makan.</li>
+                            <li><strong>Cara:</strong> Diminum dengan segelas penuh air.</li>
+                        </ul>
+                    </div>
+                `,
+                safety: [
+                    {
+                        title: "Garcinia Cambogia",
+                        content: "Umumnya ringan (sakit kepala, keluhan GI). Penting: Terdapat laporan kasus cedera hati langka dari TGA Australia terkait dosis tinggi. Kontraindikasi pada pasien dengan riwayat penyakit hati. Pasien harus diedukasi untuk berhenti dan berkonsultasi jika ada gejala penyakit kuning atau urin gelap."
+                    },
+                    {
+                        title: "Guazuma Ulmifolia",
+                        content: "Umumnya dapat ditoleransi dengan baik. Mungkin menyebabkan efek GI ringan (kembung, perubahan feses) karena efek serat dan penghambatan lipase. Memiliki profil keamanan yang tinggi berdasarkan studi toksikologi."
+                    },
+                    {
+                        title: "Camellia Sinensis",
+                        content: "Pada dosis 50 mg, sangat dapat ditoleransi dengan baik dan jauh di bawah ambang batas yang dapat menimbulkan efek samping signifikan."
+                    },
+                    {
+                        title: "Murraya Paniculata",
+                        content: "Digunakan secara tradisional dan umumnya dianggap aman. Tidak direkomendasikan untuk wanita hamil atau menyusui karena kurangnya data spesifik."
+                    },
+                    {
+                        title: "Kontraindikasi Umum",
+                        content: "Kehamilan, menyusui, penyakit hati yang diketahui, dan hipersensitivitas terhadap salah satu komponen."
+                    }
+                ],
+                faqs: [
+                    {
+                        q: "Apa bukti klinis pada manusia untuk Murraya Paniculata?",
+                        a: "Bukti untuk peran spesifiknya dalam meregulasi adipogenesis saat ini berada pada tahap pra-klinis dan in-vitro yang kuat, yang telah mengidentifikasi targetnya sebagai PPARG dan EP300. Ini dilengkapi dengan studi pada hewan dan sejarah panjang penggunaan tradisionalnya."
+                    },
+                    {
+                        q: "Dosis Teh Hijau 50 mg tampaknya rendah. Apakah efektif?",
+                        a: "Dalam formula sinergis Greenslim, perannya adalah untuk berkontribusi pada termogenesis, melengkapi aksi utama dari tiga bahan lainnya. Ini adalah salah satu bagian dari pendekatan empat pilar, bukan sebagai pendorong utama."
+                    },
+                    {
+                        q: "Saya khawatir tentang peringatan keamanan hati untuk Garcinia Cambogia.",
+                        a: "Kami berkomitmen pada transparansi dan keselamatan pasien. Itulah mengapa kami secara proaktif menginformasikan tentang laporan kasus langka ini dan memberikan panduan yang jelas: jangan gunakan pada pasien dengan penyakit hati dan edukasi pasien tentang gejalanya. Ini adalah penggunaan yang bertanggung jawab."
+                    },
+                    {
+                        q: "Bagaimana produk ini lebih baik daripada Orlistat?",
+                        a: "Orlistat adalah inhibitor lipase yang efektif. Greenslim menyediakan mekanisme aksi yang sama melalui Guazuma Ulmifolia, tetapi menambahkan tiga aksi pelengkap lainnya untuk mengatasi manajemen berat badan secara lebih holistik, termasuk jalur metabolik untuk sintesis lemak dan pengeluaran energi."
+                    }
+                ]
+            };
+
+            const pillarsContainer = document.getElementById('pillars-container');
+            data.pillars.forEach(pillar => {
+                const card = document.createElement('div');
+                card.className = 'pillar-card bg-white rounded-lg shadow p-6 text-center cursor-pointer';
+                card.innerHTML = `
+                    <div class="text-4xl mb-4">${pillar.icon}</div>
+                    <h3 class="text-lg font-bold text-[#3D405B]">${pillar.title}</h3>
+                    <p class="text-sm font-semibold text-[#6B8E23] mb-2">${pillar.ingredient}</p>
+                    <p class="text-sm text-gray-600">${pillar.description}</p>
+                `;
+                pillarsContainer.appendChild(card);
+            });
+
+            const mechanismContent = document.getElementById('mechanism-content');
+            const ingredientBtns = document.querySelectorAll('.ingredient-btn');
+            function updateMechanismContent(ingredientKey) {
+                const mechanism = data.mechanisms[ingredientKey];
+                mechanismContent.innerHTML = `
+                    <h3 class="text-xl font-semibold mb-3 text-[#3D405B]">${mechanism.title}</h3>
+                    <div class="prose prose-sm max-w-none">${mechanism.content}</div>
+                `;
+                ingredientBtns.forEach(btn => {
+                    btn.classList.remove('bg-[#6B8E23]', 'text-white');
+                    btn.classList.add('text-gray-600', 'hover:bg-gray-200');
+                    if (btn.dataset.ingredient === ingredientKey) {
+                        btn.classList.add('bg-[#6B8E23]', 'text-white');
+                        btn.classList.remove('text-gray-600', 'hover:bg-gray-200');
+                    }
+                });
+            }
+            ingredientBtns.forEach(btn => {
+                btn.addEventListener('click', () => updateMechanismContent(btn.dataset.ingredient));
+            });
+            updateMechanismContent('garcinia');
+
+            const comparisonTable = document.getElementById('comparison-table');
+            const competitorBtns = document.querySelectorAll('.competitor-btn');
+            function updateComparisonTable(competitorKey) {
+                const compData = data.comparison[competitorKey];
+                const competitorName = competitorKey === 'orlistat' ? 'Orlistat (cth., Xenical)' : 'Kompetitor Herbal Umum';
+                comparisonTable.innerHTML = `
+                    <table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col" class="py-3 px-6">Fitur</th>
+                                <th scope="col" class="py-3 px-6 bg-green-50">Greenslim</th>
+                                <th scope="col" class="py-3 px-6">${competitorName}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-white border-b"><th scope="row" class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">Mekanisme</th><td class="py-4 px-6 bg-green-50">${compData.greenslim[0]}</td><td class="py-4 px-6">${compData.competitor[0]}</td></tr>
+                            <tr class="bg-white border-b"><th scope="row" class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">Target Utama</th><td class="py-4 px-6 bg-green-50">${compData.greenslim[1]}</td><td class="py-4 px-6">${compData.competitor[1]}</td></tr>
+                            <tr class="bg-white border-b"><th scope="row" class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">Status</th><td class="py-4 px-6 bg-green-50">${compData.greenslim[2]}</td><td class="py-4 px-6">${compData.competitor[2]}</td></tr>
+                            <tr class="bg-white"><th scope="row" class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">Diferensiator Kunci</th><td class="py-4 px-6 bg-green-50">${compData.greenslim[3]}</td><td class="py-4 px-6">${compData.competitor[3]}</td></tr>
+                        </tbody>
+                    </table>
+                `;
+                 competitorBtns.forEach(btn => {
+                    btn.classList.remove('bg-[#6B8E23]', 'text-white');
+                    btn.classList.add('bg-white', 'text-gray-700', 'border');
+                    if (btn.dataset.competitor === competitorKey) {
+                        btn.classList.add('bg-[#6B8E23]', 'text-white');
+                        btn.classList.remove('bg-white', 'text-gray-700', 'border');
+                    }
+                });
+            }
+            competitorBtns.forEach(btn => {
+                btn.addEventListener('click', () => updateComparisonTable(btn.dataset.competitor));
+            });
+            updateComparisonTable('orlistat');
+            
+            document.getElementById('patient-profile').innerHTML = data.patientProfile;
+
+            const safetyContainer = document.getElementById('safety-profile');
+            data.safety.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'border rounded-lg';
+                div.innerHTML = `
+                    <button class="accordion-btn w-full text-left p-4 font-semibold flex justify-between items-center transition hover:bg-gray-50">
+                        <span>${item.title}</span>
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content px-4 pb-4 text-gray-600 text-sm">
+                        <p>${item.content}</p>
+                    </div>
+                `;
+                safetyContainer.appendChild(div);
+            });
+
+            const faqContainer = document.getElementById('faq-container');
+            data.faqs.forEach(faq => {
+                const div = document.createElement('div');
+                div.className = 'border rounded-lg';
+                div.innerHTML = `
+                    <button class="accordion-btn w-full text-left p-4 font-semibold flex justify-between items-center transition hover:bg-gray-50">
+                        <span>${faq.q}</span>
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content px-4 pb-4 text-gray-600">
+                        <p>${faq.a}</p>
+                    </div>
+                `;
+                faqContainer.appendChild(div);
+            });
+
+            document.querySelectorAll('.accordion-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    const icon = button.querySelector('span:last-child');
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            const navButtons = document.querySelectorAll('.nav-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    const targetTab = button.dataset.tab;
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === targetTab) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            const ctx = document.getElementById('obesityChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['2007', '2010', '2013', '2016', '2019', '2023'],
+                    datasets: [
+                        {
+                            label: 'Wanita (Kelebihan Berat Badan/Obesitas)',
+                            data: [20, 25, 30, 35, 40, 42.5],
+                            borderColor: '#E1578A',
+                            backgroundColor: '#E1578A20',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Pria (Kelebihan Berat Badan/Obesitas)',
+                            data: [15, 18, 22, 25, 28, 32.5],
+                            borderColor: '#3B82F6',
+                            backgroundColor: '#3B82F620',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Prevalensi (%)'
+                            }
+                        },
+                        x: {
+                             title: {
+                                display: true,
+                                text: 'Tahun'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Tren Peningkatan Prevalensi Obesitas di Indonesia (2007-2023)',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
